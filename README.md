@@ -13,6 +13,7 @@ Bright, Jamie M. & Engerer, Nicholas A. 2019. Engerer2: Global re-parameterisati
 
 We request that Engerer (2015), Bright & Engerer (2019), as well as this repository be cited if using this code in research. 
 
+## PREDICTORS
 The predictor variables to fit B0-5 are based on:
 kt = clearness index
 zen = zenith angle
@@ -20,6 +21,7 @@ ast = apparent solar time
 dktc = ktc - kt (ktc is the clear-sky clearness index = ghi,cs/e_exth.
 k_de = Proportion of kd attributable to cloud enhancement
 
+## PARAMETERS
 The new parameters are defined in the paper as:
 
  | Parameter | Predictor | Orig1-min | New1-min | 5-min | 10-min | 15-min | 30-min | 1-hr | 1-day | 
@@ -32,14 +34,14 @@ The new parameters are defined in the paper as:
  | B4 | dKtc | -5.3146 | -4.9302 | -4.3921 | -4.1457 | -4.169 | -4.0304 | -3.0329 | 6.6257 | 
  | B5 | Kde | 1.7073 | 0.44378 | 0.39331 | 0.37466 | 0.39526 | 0.47371 | 0.56403 | 0.31419 | 
 
-INPUT PARAMETERS
-ghi   = Global horizontal irradiance [W/m^2]
-time = in the matlab datevec format [yyyy, mm, dd, HH, MM, SS] [UTC]
-latitudes = either a latitude per measurement or one for all.
-longitude = either a longitude per measurement or one for all.
-averaging_period = x in minutes. Must be 1, 5, 10, 15, 30, 60 or 1440 
+## INPUT PARAMETERS
++ ghi   = Global horizontal irradiance [W/m^2]
++ time = in the matlab datevec format [yyyy, mm, dd, HH, MM, SS] [UTC]
++ latitudes = either a latitude per measurement or one for all.
++ longitude = either a longitude per measurement or one for all.
++ averaging_period = x in minutes. Must be 1, 5, 10, 15, 30, 60 or 1440 
 
-OUTPUT PARAMETERS
-Kd = diffuse fraction = Edh/ghi [fraction]
-Edh = diffuse horizontal irradiance [W/m^2]
-Ebn = direct/beam normal irradiance [W/m^2]
+## OUTPUT PARAMETERS
++ Kd = diffuse fraction = Edh/ghi [fraction]
++ Edh = diffuse horizontal irradiance [W/m^2]
++ Ebn = direct/beam normal irradiance [W/m^2]
