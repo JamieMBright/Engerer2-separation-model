@@ -3,34 +3,35 @@ function [Kd, Edh, Ebn] = Engerer2Separation(Egh, latitudes, longitudes, time, a
 % paper: Engerer, N. A. 2015. Minute resolution estimates of the diffuse
 % fraction of global irradiance for southeastern Australia. Solar Energy.
 % 116, 215-237. Section 4. Development of new models.
-
 % The paper presents 3 variations of the Engerer separation model: 1, 2 & 3
 % The Engerer1 is fit to Non-Cloud Enhancement data, the Engerer2 to Cloud
 % Enhancement data and Engerer3 to clear-sky data only.
 
-% The methodology uses a generalized logsitic function:
-% Y(x) = C +% (A-C)/(1+B0*exp(B1+B2*x)),
-%
-% where C is the value of the lower asymptote, A the value of upper
-% asymptote, x is the independent variable and coefficients B0-2 are
-% determined by regression.
-%
-% The predictor variables to fit B0-2 are based on:
-% kt = clearness index = ghi/e_exth
-% zenith angle
-% apparent solar time
-% dktc = ktc - kt (where ktc is the clear-sky clearness index = ghi,cs/e_exth.
-% k_de = Proportion of Kd attributable to cloud enhancement
+% The predictor variables to fit B0-5 are based on:
+% kt = clearness index
+% zen = zenith angle
+% ast = apparent solar time
+% dktc = ktc - kt (ktc is the clear-sky clearness index = ghi,cs/e_exth.
+% k_de = Proportion of kd attributable to cloud enhancement
 
-% the parameters are defined in the paper as:
-% Parameter, Predictor,   Orig 1-min, New 1-min,  5-min,       10-min,      15-min,      30-min,     1-hr,       1-day
-% C,          - &,         0.042336,   0.10562,    0.093936,   0.079965,   0.065972,   0.032675,   -0.0097539, 0.32726
-% B0,         - &,         -3.7912,    -4.1332,    -4.5771,    -4.8539,    -4.7211,    -4.8681,    -5.3169,    -9.4391
+% The original formulation was found to be not general enough to other
+% parts of the world and at different temporal resolutions, and so in a new
+% paper, the parameters have been updated. Bright, Jamie M. & Engerer,
+% Nicholas A. 2019. Engerer2: Global re-parameterisation, update and
+% validation of an irradiance separation model at different temporal
+% resolutions. Journal of Renewable & Sustainable Energy. 11(2), xxx.
+
+% The new parameters are defined in the paper as:
+% ===================================================================================================================
+% Parameter, Predictor,   Orig 1-min, New 1-min,  5-min       10-min      15-min      30-min,     1-hr,       1-day
+% C,          - &         0.042336,   0.10562,    0.093936,   0.079965,   0.065972,   0.032675,   -0.0097539, 0.32726
+% B0,         - &         -3.7912,    -4.1332,    -4.5771,    -4.8539,    -4.7211,    -4.8681,    -5.3169,    -9.4391
 % B1,         K_t,         7.5479,    8.2578,     8.4641,     8.4764,     8.3294,     8.1867,     8.5084,     17.113
 % B2,         AST,        -0.010036,  0.010087,   0.010012,   0.018849,   0.0095444,  0.015829,   0.013241,   0.13752
 % B3,         zen,        0.003148,   0.00088801, 0.003975,   0.0051497,  0.0053493,  0.0059922,  0.0074356,  -0.024099
 % B4,         dKtc,       -5.3146,    -4.9302,    -4.3921,    -4.1457,    -4.169,     -4.0304,    -3.0329,    6.6257
 % B5,         Kde,        1.7073,     0.44378,    0.39331,    0.37466,    0.39526,    0.47371,    0.56403,    0.31419
+% ===================================================================================================================
 
 % INPUT PARAMETERS
 % ghi   = Global horizontal irradiance [W/m^2]
@@ -45,20 +46,22 @@ function [Kd, Edh, Ebn] = Engerer2Separation(Egh, latitudes, longitudes, time, a
 % Ebn = direct/beam normal irradiance [W/m^2]
 % 
 % % EXMAPLE USAGE
-% averaging_period = 5; % in mins
-% % specify a 15 time step period in UTC
-% time = datevec( datenum(2017,12,5,12,0,0):averaging_period/1440:datenum(2017,12,5,12,0,0)+ (averaging_period/1440*15));
-% latitude = 47; % degrees north
-% longitude = 1; % degree east
-% % random irradiance values
-% Egh = ones(length(time),1).*1000.*rand(length(time),1);
-% [Kd, Edh, Ebn] = Engerer2Separation(Egh, latitude, longitude, time, averaging_period);
-% figure(1); plot(datetime(time),Egh,datetime(time),Edh,datetime(time),Ebn); legend('Egh','Edh','Ebn');
+% time = [2018,05,01,08,01,00;...
+%         2016,03,05,10,15,00;...
+%         2015,09,10,13,17,00;...
+%         2014,01,20,20,18,00];
+% Egh = [300;400;1000;600];
+% longitudes=[-60;-5;20;170];
+% latitudes=[-10;10;40;-40];
+% averaging_period = 1;
+% [Kd, Edh, Ebn] = Engerer2Separation(Egh, latitudes, longitudes, time, averaging_period)
+% 
+
 
 %% Input saftey checks
 % check length of all data is equal
-if length(unique([length(Egh),length(time)]))~=1
-    error('Egh, Eghcs, E0h, zen and ha must all be the same length of corresponding time steps')
+if length(unique([length(Egh),size(time,1)]))~=1
+    error('Egh and time must be the same length of corresponding time steps')
 end
 % check class 
 if ~isnumeric(Egh)
@@ -83,8 +86,8 @@ decimal_time  = (time(:,4).*60 + time(:,5) + time(:,6)./60^2)./60; %where (:,4) 
 doy = datenum( time(:,1:3) ) - datenum( [time(:,1) ones(size(time,1),2)] ) +1;  
 
 % Equation of time
-beta = (360 / 365.242).*(doy-1); 
-EoT = (0.258 .* cosd(beta) - 7.416 .* sind(beta) - 3.648 .* cosd(2 .* beta) - 9.228 .* sind(2 .* beta)); 
+beta_eot = (360 / 365.242).*(doy-1); 
+EoT = (0.258 .* cosd(beta_eot) - 7.416 .* sind(beta_eot) - 3.648 .* cosd(2 .* beta_eot) - 9.228 .* sind(2 .* beta_eot)); 
 
 % Local solar noon
 lsn = 12 - longitudes./15 -1.*(EoT./60) ;                                            
@@ -120,7 +123,9 @@ A = 1160 + 75 .* sin((360.*(doy-275))./365);
 k = 0.174 + 0.035 .* sin((360.*(doy-100))./365);
 C = 0.095 + 0.04 .* sin((360.*(doy-100))./365);
 Ebncs = A .* exp(-k./cosd(zen));
+Ebncs(zen>90) = 0;
 Eghcs = Ebncs.*cosd(zen) + C.*Ebncs;
+Eghcs(zen>90) = 0;
 
 %% Calculate predictors.
 % clearness index
@@ -141,7 +146,20 @@ AST(AST<0)=abs(AST(AST<0));
 cloud_enhancement_estimate = Egh - Eghcs;
 cloud_enhancement_estimate(cloud_enhancement_estimate<0.015) = 0;
 Kde = cloud_enhancement_estimate./Egh;
-Kde(isnan(Kde)) = 0;
+
+%% QC the predictors
+% it is likely/possible for there to be inf values and NaN values.
+Kt(isinf(Kt))=NaN;
+Ktc(isinf(Ktc))=NaN;
+dKtc(isinf(dKtc))=NaN;
+AST(isinf(AST))=NaN;
+Kde(isinf(Kde))=NaN;
+
+Kt(zen>90)=NaN;
+Ktc(zen>90)=NaN;
+dKtc(zen>90)=NaN;
+AST(zen>90)=NaN;
+Kde(zen>90)=NaN;
 
 %% Engerer version parametrisation
 %     %original Engerer 2 variables.
@@ -171,12 +189,10 @@ B2 = parameters(4);
 B3 = parameters(5);
 B4 = parameters(6);
 B5 = parameters(7);
-    
 
 % generalised logistic function.
 Engerer2 = @(C, B0, B1, B2, B3, B4, B5, zen, AST, dKtc, Kde) ...
     C + (1-C) ./ (1 + exp(B0 + B1.*Kt + B2.*AST + B3.*zen + B4.*dKtc)) + B5.*Kde;
-
 
 %% Calculate the outputs
 % calculated the diffuse fraction
@@ -193,19 +209,9 @@ Edh = Egh.*Kd;
 Ebn = (Egh - Edh)./cosd(zen);
 
 %% Quality control
-% this is particularly relevant at low zeniths. 
+% this is particularly relevant at low zeniths.
+Ebn(zen>90) = NaN;
+Edh(zen>90) = NaN;
+Kd(zen>90) = NaN;
 
-%% plot an the output
-% figure('name','Example of the separation model','color','w')
-% hold on
-% plot(Egh);
-% plot(Ebn);
-% plot(Edh); 
-% plotyy(1,1,1:length(Kd),Kd) 
-% hold off
-% legend({'Global Horizontal','Direct Normal','Diffuse Horizontal','Diffuse fraction'},'interpreter','latex')
-% set(gca,'fontname','times')
-% ylim([0 1400])
-% ylabel('Irradiance [Wm$^{-2}$]','Interpreter','latex')
-% xlabel('Time','Interpreter','latex')
 end
