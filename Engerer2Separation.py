@@ -107,8 +107,8 @@ def engerer2separation(ghi, latitudes, longitudes, time, averaging_period):
 
     # Declination angle
     phi_r = (2 * np.pi / 365) * (day_of_year + (decimal_time / 24) - 1)
-    delta_r = 0.006918 - 0.399912 * np.cos(phi_r) + 0.070257 * np.sin(phi_r) - 0.006758 * np.cos(2 * phi_r)
-    + 0.000907 * np.sin(2 * phi_r) - 0.002697 * np.cos(3 * phi_r) + 0.001480 * np.sin(3 * phi_r)
+    delta_r = 0.006918 - 0.399912 * np.cos(phi_r) + 0.070257 * np.sin(phi_r) - 0.006758 * np.cos(2 * phi_r) \
+        + 0.000907 * np.sin(2 * phi_r) - 0.002697 * np.cos(3 * phi_r) + 0.001480 * np.sin(3 * phi_r)
 
     # Zenith angle
     zen = np.arccos(np.sin(np.pi / 180 * latitudes) * np.sin(delta_r) + np.cos(np.pi / 180 * latitudes) *
