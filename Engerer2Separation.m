@@ -119,9 +119,9 @@ E0h = Eextn.*cosd(zen);
 E0h(zen>90)=0;
 
 % The TJ clear-sky model
-A = 1160 + 75 .* sin((360.*(doy-275))./365);
-k = 0.174 + 0.035 .* sin((360.*(doy-100))./365);
-C = 0.095 + 0.04 .* sin((360.*(doy-100))./365);
+A = 1160 + 75 .* sind((360.*(doy-275))./365);
+k = 0.174 + 0.035 .* sind((360.*(doy-100))./365);
+C = 0.095 + 0.04 .* sind((360.*(doy-100))./365);
 Ebncs = A .* exp(-k./cosd(zen));
 Ebncs(zen>90) = 0;
 Eghcs = Ebncs.*cosd(zen) + C.*Ebncs;
