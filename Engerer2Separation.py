@@ -125,9 +125,9 @@ def engerer2separation(ghi, latitudes, longitudes, time, averaging_period):
     e_exth[zen > np.pi / 180 * 90] = 0
 
     # The TJ clear-sky model
-    a_tj = 1160 + 75 * np.sin((360 * (day_of_year - 275)) / 365)
-    k_tj = 0.174 + 0.035 * np.sin((360 * (day_of_year - 100)) / 365)
-    c_tj = 0.095 + 0.04 * np.sin((360 * (day_of_year - 100)) / 365)
+    a_tj = 1160 + 75 * np.sind((360 * (day_of_year - 275)) / 365)
+    k_tj = 0.174 + 0.035 * np.sind((360 * (day_of_year - 100)) / 365)
+    c_tj = 0.095 + 0.04 * np.sind((360 * (day_of_year - 100)) / 365)
     dnics = a_tj * np.exp(-k_tj / np.cos(zen))
     dnics[zen > np.pi / 180 * 90] = 0
     ghics = dnics * np.cos(zen) + c_tj * dnics
